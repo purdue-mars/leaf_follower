@@ -1,0 +1,17 @@
+digraph G {
+"base_link" -> "base"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1675113167.252 sec old)\nBuffer length: 0.000 sec\n"];
+"base_link" -> "base_link_inertia"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1675113167.252 sec old)\nBuffer length: 0.000 sec\n"];
+"flange" -> "tool0"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1675113167.252 sec old)\nBuffer length: 0.000 sec\n"];
+"wrist_3_link" -> "flange"[label="Broadcaster: /robot_state_publisher\nAverage rate: 10000.000 Hz\nMost recent transform: 0.000 ( 1675113167.252 sec old)\nBuffer length: 0.000 sec\n"];
+"wrist_2_link" -> "wrist_3_link"[label="Broadcaster: /robot_state_publisher\nAverage rate: 47.507 Hz\nMost recent transform: 1675113166.592 ( 0.660 sec old)\nBuffer length: 4.694 sec\n"];
+"base" -> "tool0_controller"[label="Broadcaster: /ur_hardware_interface\nAverage rate: 499.998 Hz\nMost recent transform: 1675113166.650 ( 0.602 sec old)\nBuffer length: 4.762 sec\n"];
+"upper_arm_link" -> "forearm_link"[label="Broadcaster: /robot_state_publisher\nAverage rate: 47.507 Hz\nMost recent transform: 1675113166.592 ( 0.660 sec old)\nBuffer length: 4.694 sec\n"];
+"shoulder_link" -> "upper_arm_link"[label="Broadcaster: /robot_state_publisher\nAverage rate: 47.507 Hz\nMost recent transform: 1675113166.592 ( 0.660 sec old)\nBuffer length: 4.694 sec\n"];
+"base_link_inertia" -> "shoulder_link"[label="Broadcaster: /robot_state_publisher\nAverage rate: 47.507 Hz\nMost recent transform: 1675113166.592 ( 0.660 sec old)\nBuffer length: 4.694 sec\n"];
+"forearm_link" -> "wrist_1_link"[label="Broadcaster: /robot_state_publisher\nAverage rate: 47.507 Hz\nMost recent transform: 1675113166.592 ( 0.660 sec old)\nBuffer length: 4.694 sec\n"];
+"wrist_1_link" -> "wrist_2_link"[label="Broadcaster: /robot_state_publisher\nAverage rate: 47.507 Hz\nMost recent transform: 1675113166.592 ( 0.660 sec old)\nBuffer length: 4.694 sec\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1675113167.252"[ shape=plaintext ] ;
+ }->"base_link";
+}
