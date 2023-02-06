@@ -9,7 +9,10 @@
 #include "std_msgs/Float32.h"
 
 #define MAX_GRASP_POS 2.2
+
+// tune for object
 #define STABLE_CONTACT_AREA 15
+
 #define V_MAX 0.1
 #define Kp 0.01
 #define Kd 0.00

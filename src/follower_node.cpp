@@ -13,7 +13,7 @@
 #include "ros/subscriber.h"
 #include "tf/LinearMath/Transform.h"
 
-#define VNORM 0.01
+#define VNORM 0.005
 
 Eigen::Vector3d cable_pos;
 geometry_msgs::Twist tcp_vel;
@@ -45,27 +45,12 @@ int main(int argc, char** argv) {
     tf::TransformListener listener;
     tf::StampedTransform transform;
     Eigen::Affine3d T_O_tcp;
-    Eigen::Vector3d fixed_pos;
-    fixed_pos << 0, 0, 0;
-    Eigen::Quaterniond fixed_quat(0, 0, 0, 1);
+
+    bool initialized = false;
 
     while (ros::ok()) {
-        try {
-            listener.lookupTransform("base", "tool0", ros::Time(0), transform);
-        } catch (tf::TransformException ex) {
-            // ROS_ERROR("%s", ex.what());
-        }
-
-        tf::transformTFToEigen(transform, T_O_tcp);
-        Eigen::Vector3d pos = T_O_tcp.translation();
-        Eigen::Quaterniond quat(T_O_tcp.rotation());
-
-        // Find pose wrt fixed frame
-        pos -= fixed_pos;
-        quat *= fixed_quat.inverse();
-
         // Get cable pose from GelSight
-        double y = cable_pos(1) + pos(1);
+        double y = cable_pos(1);
         double theta = 0.0;
 
         // Calculate model state (y, theta, alpha)
@@ -74,7 +59,8 @@ int main(int argc, char** argv) {
 
         // Calculate phi from K
         std::cout << "x: " << x << std::endl;
-        Eigen::Vector3d K(-1.5, -9.54405588, 13.36354662);
+
+        Eigen::Vector3d K(-200, 0, 0);
         double phi = -K.dot(x);
         std::cout << "phi: " << phi << std::endl;
 
@@ -83,7 +69,7 @@ int main(int argc, char** argv) {
         target_dir =
             fmax(-3.14159265 / 3.0, fmin(target_dir, 3.14159265 / 3.0));
 
-        std::cout << target_dir << std::endl;
+        // std::cout << target_dir << std::endl;
 
         // Publish velocity to arm
         tcp_vel.linear.x = -VNORM * cos(target_dir);

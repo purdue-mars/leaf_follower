@@ -1,0 +1,4 @@
+<launch>
+    <node name="follower_node" pkg="mars_leaf_follower" type="follower_node" respawn="false" output="screen"/>
+    <node name="grasp_node" pkg="mars_leaf_follower" type="grasp_control_node" respawn="false" output="screen"/>
+</launch>
