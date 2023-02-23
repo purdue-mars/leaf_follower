@@ -15,13 +15,17 @@
 
 #define VNORM 0.005
 
+#define PI 3.14159265
+
 Eigen::Vector3d cable_pos;
+Eigen::Quaterniond cable_angle;
 geometry_msgs::Twist tcp_vel;
 ros::Publisher arm_pub;
 
 void ArmShutdownHandler(int sig) {
     tcp_vel.linear.x = 0;
     tcp_vel.linear.y = 0;
+    tcp_vel.angular.z = 0;
     arm_pub.publish(tcp_vel);
     ros::shutdown();
 }
@@ -29,6 +33,11 @@ void ArmShutdownHandler(int sig) {
 void pca_cb(const geometry_msgs::PoseStamped& p) {
     cable_pos(0) = p.pose.position.x;
     cable_pos(1) = p.pose.position.y;
+
+    cable_angle.w() = p.pose.orientation.w;
+    cable_angle.x() = p.pose.orientation.x;
+    cable_angle.y() = p.pose.orientation.y;
+    cable_angle.z() = p.pose.orientation.z;
 }
 
 int main(int argc, char** argv) {
@@ -47,36 +56,35 @@ int main(int argc, char** argv) {
     Eigen::Affine3d T_O_tcp;
 
     bool initialized = false;
+    double K_p_th = 600;
+    double K_p_y = 200;
 
     while (ros::ok()) {
         // Get cable pose from GelSight
-        double y = cable_pos(1);
-        double theta = 0.0;
+        double y = cable_pos(0);
+        auto angles = cable_angle.toRotationMatrix().eulerAngles(0, 1, 2);
+        double theta = angles[2];
 
-        // Calculate model state (y, theta, alpha)
-        double alpha = 0.0;  // Use x, y and y_global
-        Eigen::Vector3d x(y, theta, alpha);
+        theta = -PI / 2 - theta;
 
-        // Calculate phi from K
-        std::cout << "x: " << x << std::endl;
-
-        Eigen::Vector3d K(-200, 0, 0);
-        double phi = -K.dot(x);
-        std::cout << "phi: " << phi << std::endl;
+        std::cout << theta << std::endl;
+        double phi = K_p_y * y;
+        theta = K_p_th * theta;
 
         // Calculate velocity command from phi
-        double target_dir = phi + alpha;
-        target_dir =
-            fmax(-3.14159265 / 3.0, fmin(target_dir, 3.14159265 / 3.0));
+        phi = fmax(-PI / 3.0, fmin(phi, PI / 3.0));
+        theta = fmax(-5, fmin(theta, 5));
 
         // std::cout << target_dir << std::endl;
 
         // Publish velocity to arm
-        tcp_vel.linear.x = -VNORM * cos(target_dir);
-        tcp_vel.linear.y = VNORM * sin(target_dir);
+        tcp_vel.linear.x = -VNORM * cos(phi);
+        tcp_vel.linear.y = VNORM * sin(phi);
+        tcp_vel.angular.z = VNORM * theta;
 
         std::cout << "x: " << tcp_vel.linear.x << std::endl;
         std::cout << "y: " << tcp_vel.linear.y << std::endl;
+        std::cout << "z_th: " << tcp_vel.angular.z << std::endl;
 
         arm_pub.publish(tcp_vel);
 

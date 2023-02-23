@@ -11,11 +11,11 @@
 #define MAX_GRASP_POS 2.2
 
 // tune for object
-#define STABLE_CONTACT_AREA 15
 
+#define STABLE_CONTACT_AREA 200
 #define V_MAX 0.1
-#define Kp 0.01
-#define Kd 0.00
+#define Kp 0.001
+#define Kd 0.0001
 #define JOINT_NAME "gripper_joint"
 #define LIM_HI 2.5
 #define LIM_LOW 0.0
