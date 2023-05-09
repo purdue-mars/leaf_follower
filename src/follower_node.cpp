@@ -113,8 +113,8 @@ int main(int argc, char** argv) {
         w = Eigen::Vector3d::Zero();
 
         v(1) = VNORM * cos(phi);
-        v(2) = VNORM * sin(phi);
-        w(0) = VNORM * theta;
+        v(2) = VNORM * -sin(phi);
+        w(0) = VNORM * -theta;
 
         // transforms v,w from tool frame to base_frame
         tf_twist_A_to_B(T_base_tcp, v, w, v, w);
