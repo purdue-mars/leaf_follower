@@ -12,7 +12,7 @@
 
 // tune for object
 
-#define STABLE_CONTACT_AREA 200
+#define STABLE_CONTACT_AREA 100
 #define V_MAX 0.1
 #define Kp 0.001
 #define Kd 0.0001

@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     geometry_msgs 
     tf_conversions
-
 )
 
 find_package(Eigen3 REQUIRED)
@@ -18,11 +17,10 @@ catkin_package(
 #  LIBRARIES mars_leaf_follower
    CATKIN_DEPENDS 
      roscpp 
-     tf
+     tf_conversions
      sensor_msgs 
      std_msgs
      geometry_msgs 
-     tf_conversions
 #  DEPENDS system_lib
 )
 
