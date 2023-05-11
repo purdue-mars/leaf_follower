@@ -1,4 +1,5 @@
-CONTAINER_NAME="leaf-follower-$USER"
+REPO_NAME="leaf-follower"
+CONTAINER_NAME="${CONTAINER_NAME:-$USER-$REPO_NAME}"
 
 docker exec -it \
     -e DISPLAY=$DISPLAY \
@@ -6,4 +7,4 @@ docker exec -it \
     -e LIBGL_ALWAYS_INDIRECT \
     $@ \
     $CONTAINER_NAME \
-    ${DOCKER_CMD:-/bin/bash -i}
+    ${DOCKER_CMD:-/bin/bash}

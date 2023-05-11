@@ -1,0 +1,13 @@
+<launch>
+    <node name="dynamixel_interface_node" pkg="dynamixel_interface" type="dynamixel_interface_controller_node" output="screen">
+          <rosparam command="load" file="$(find leaf_following_control)/config/wedge_gripper_dynamixel_config.yaml" />
+    </node>
+
+    <include file="$(find gelsight_ros)/launch/gelsight.launch"/>
+
+    <include file="$(find ur_robot_driver)/launch/ur10_bringup.launch">
+        <arg name="robot_ip" value="192.168.1.102" />
+        <arg name="kinematics_config" value="$(find leaf_following_control)/config/ur10_abe_calibration.yaml" />
+        <arg name="controllers" value="joint_state_controller twist_controller" />
+    </include>
+</launch>

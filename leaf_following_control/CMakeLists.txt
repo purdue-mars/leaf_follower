@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(mars_leaf_follower)
+project(leaf_following_control)
 
 find_package(catkin REQUIRED COMPONENTS 
     roscpp 
