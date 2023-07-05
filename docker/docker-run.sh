@@ -24,7 +24,7 @@ REPO_MNT="$REPO_DIR:/code/catkin_ws/src/leaf_follower"
 # For GUI
 
 X11_MNT="/tmp/.X11-unix:/tmp/.X11-unix"
-XAuthority_MNT="/home/raghava/.Xauthority:/tmp/.XAuthority" # change this
+XAuthority_MNT="/home/phenoabe/.Xauthority:/tmp/.XAuthority" # change this
 
 # device passthrough to container
 GELSIGHT_DEV="/dev/video0" # use v4l2-ctl

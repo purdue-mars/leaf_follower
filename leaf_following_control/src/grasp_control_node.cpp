@@ -12,12 +12,12 @@
 
 // tune for object
 
-#define STABLE_CONTACT_AREA 150
-#define V_MAX 0.1
-#define Kp 0.001
+#define STABLE_CONTACT_AREA 120
+#define V_MAX 0.2
+#define Kp 0.003
 #define Kd 0.0001
 #define JOINT_NAME "gripper_joint"
-#define LIM_HI 2.5
+#define LIM_HI 2.6
 #define LIM_LOW 0.0
 
 float contact_area;
