@@ -1,6 +1,10 @@
 # leaf_follower
 Using GelSight and UR5e to follow a leaf
 
+![demo-leaf-following](https://github.com/purdue-mars/leaf_follower/assets/41026849/bd875265-bcf7-4fb4-bec1-7c7bdd6bf5b4)
+
+
+
 ## Quick start
 >  Requires [docker](https://docs.docker.com/get-docker/)
 
