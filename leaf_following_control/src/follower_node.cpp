@@ -3,6 +3,7 @@
 #include <ros/ros.h>
 #include <signal.h>
 #include <std_msgs/Float32.h>
+#include "std_msgs/Bool.h" // Include for Bool message
 #include <stdio.h>
 #include <tf/transform_listener.h>
 #include <tf_conversions/tf_eigen.h>
@@ -18,13 +19,21 @@ Eigen::Vector3d cable_pos;
 Eigen::Quaterniond cable_angle;
 geometry_msgs::Twist tcp_vel;
 ros::Publisher arm_pub;
+bool start_processing = false; // Global flag to control processing
 
 void ArmShutdownHandler(int sig) {
     tcp_vel.linear.x = 0;
     tcp_vel.linear.y = 0;
+    tcp_vel.linear.z = 0;
+    tcp_vel.angular.x = 0;
+    tcp_vel.angular.y = 0;
     tcp_vel.angular.z = 0;
     arm_pub.publish(tcp_vel);
     ros::shutdown();
+}
+
+void start_cb(const std_msgs::Bool& start_signal) {
+    start_processing = start_signal.data; // Set flag based on the received signal
 }
 
 void pca_cb(const geometry_msgs::PoseStamped& p) {
@@ -64,7 +73,7 @@ int main(int argc, char** argv) {
         nh.subscribe("/gelsight/diff_pose", 1000, pca_cb);
     arm_pub =
         nh.advertise<geometry_msgs::Twist>("/twist_controller/command", 2);
-
+    ros::Subscriber start_sub = nh.subscribe("/scanner_start_signal", 10, start_cb);
     ros::Rate hz(50);
     tf::TransformListener tf_listener;
 
@@ -79,57 +88,64 @@ int main(int argc, char** argv) {
     double prev_y = 0;
 
     while (ros::ok()) {
-        try {
-            tf::StampedTransform transform;
-            tf_listener.lookupTransform("tool0", "base_link", ros::Time(0),
-                                        transform);
-            tf::transformTFToEigen(transform, T_base_tcp);
-        } catch (tf2::TransformException& ex) {
-            ROS_WARN("%s", ex.what());
+        if (start_processing) { // Check if processing should start
+            try {
+                tf::StampedTransform transform;
+                tf_listener.lookupTransform("tool0", "base_link", ros::Time(0),
+                                            transform);
+                tf::transformTFToEigen(transform, T_base_tcp);
+            } catch (tf2::TransformException& ex) {
+                ROS_WARN("%s", ex.what());
+            }
+
+            // Get cable pose from GelSight
+            double y = cable_pos(0);
+            auto angles = cable_angle.toRotationMatrix().eulerAngles(0, 1, 2);
+            double theta = angles[2];
+
+            theta = -PI / 2 - theta;
+
+            std::cout << theta << std::endl;
+            double phi = Kp_y * y + Kd_y * (y - prev_y);
+            theta = Kp_th * theta + Kd_th * (theta - prev_theta);
+            prev_theta = theta;
+            prev_y = y;
+
+            // Calculate velocity command from phi
+            phi = fmax(-PI / 3.0, fmin(phi, PI / 3.0));
+            theta = fmax(-5, fmin(theta, 5));
+
+            // std::cout << target_dir << std::endl;
+
+            // Publish velocity to arm
+            Eigen::Vector3d v, w;
+            v = Eigen::Vector3d::Zero();
+            w = Eigen::Vector3d::Zero();
+
+            v(1) = VNORM * cos(phi);
+            v(2) = VNORM * -sin(phi);
+            w(0) = VNORM * -theta;
+
+            // transforms v,w from tool frame to base_frame
+            tf_twist_A_to_B(T_base_tcp, v, w, v, w);
+
+            tcp_vel.linear.x = v(0);
+            tcp_vel.linear.y = v(1);
+            tcp_vel.linear.z = v(2);
+            tcp_vel.angular.x = w(0);
+            tcp_vel.angular.y = w(1);
+            tcp_vel.angular.z = w(2);
+        } else {
+	    tcp_vel.linear.x = 0;
+	    tcp_vel.linear.y = 0;
+	    tcp_vel.linear.z = 0;
+	    tcp_vel.angular.x = 0;
+	    tcp_vel.angular.y = 0;
+	    tcp_vel.angular.z = 0;
         }
-
-        // Get cable pose from GelSight
-        double y = cable_pos(0);
-        auto angles = cable_angle.toRotationMatrix().eulerAngles(0, 1, 2);
-        double theta = angles[2];
-
-        theta = -PI / 2 - theta;
-
-        std::cout << theta << std::endl;
-        double phi = Kp_y * y + Kd_y * (y - prev_y);
-        theta = Kp_th * theta + Kd_th * (theta - prev_theta);
-        prev_theta = theta;
-        prev_y = y;
-
-        // Calculate velocity command from phi
-        phi = fmax(-PI / 3.0, fmin(phi, PI / 3.0));
-        theta = fmax(-5, fmin(theta, 5));
-
-        // std::cout << target_dir << std::endl;
-
-        // Publish velocity to arm
-        Eigen::Vector3d v, w;
-        v = Eigen::Vector3d::Zero();
-        w = Eigen::Vector3d::Zero();
-
-        v(1) = VNORM * cos(phi);
-        v(2) = VNORM * -sin(phi);
-        w(0) = VNORM * -theta;
-
-        // transforms v,w from tool frame to base_frame
-        tf_twist_A_to_B(T_base_tcp, v, w, v, w);
-
-        tcp_vel.linear.x = v(0);
-        tcp_vel.linear.y = v(1);
-        tcp_vel.linear.z = v(2);
-        tcp_vel.angular.x = w(0);
-        tcp_vel.angular.y = w(1);
-        tcp_vel.angular.z = w(2);
-
-        arm_pub.publish(tcp_vel);
-
+	arm_pub.publish(tcp_vel);
+        ros::spinOnce(); // Still need to call spinOnce to process callbacks
         hz.sleep();
-        ros::spinOnce();
     }
 
     return 0;

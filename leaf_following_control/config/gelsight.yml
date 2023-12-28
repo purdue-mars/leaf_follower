@@ -1,0 +1,75 @@
+stream:
+  sensor: GelsightMini
+  id: CAM_GELSIGHT
+  url: "http://192.168.0.199:8080/?action=stream"
+  #  height: 160
+  #width: 120
+  # mmpp: 0.1546573039481141
+  mmpp: 0.075
+  #roi: [[447, 116], [444, 375], [55, 430], [50, 74]] # TL, TR, BR, BL
+  # # Uncomment to publish
+  topic_name: "raw_image"
+
+diff:
+  enable: true
+  # # Uncomment to publish 
+  topic_name: "diff_image"
+  markers: false
+  contact:
+      enable: true
+      buffer_size: 30
+      topic_name: "diff_contact"
+  pose:
+    buffer_size: 30
+    threshold: 60
+    enable: true 
+    #mpp: 0.000179990
+    mpp: 0.000075
+    topic_name: "diff_pose"
+    img: 
+        enable: true
+        topic_name: "diff_pose_img"
+
+
+depth:
+  enable: false
+  method: "model" # Either 'functional' or 'model'
+  depth_min: 0.001
+  image_mpp: 0.0001642072150756061
+  compute_type: "cpu" # Either 'cuda' or 'cpu'
+  model_path: /home/ruppulur/.ros/pan_pan_no_markers_labels-8-8/train_xy/model-14-17-15.pth
+  # Comment to not publish
+  topic_name: "depth"
+  img:
+    enable: true 
+    # Uncomment to publish
+    topic_name: "depth_image"
+    encoding: 'mono8'
+
+markers:
+  enable: false 
+  threshold_block_size: 41
+  threshold_neg_bias: 19
+  marker_neighborhood_size: 33
+  # Comment to not publish
+  topic_name: "markers"
+  publish_image: false # Will be published to "(topic_name)_image"
+
+flow:
+  enable: false 
+  n: 10 # (10,14)
+  m: 14 
+  x0: 10 # (13,6)
+  y0: 7 
+  dx: 10
+  dy: 10
+  # Comment to not publish
+  topic_name: "flow"
+  publish_image: false # Will be published to "(topic_name)_flow"
+
+pose:
+  enable: false 
+  method: "depth" # Either 'markers' or 'depth'
+  buffer_size: 1 # Must be 1 or greater
+  # Comment to not publish
+  topic_name: "pose"
